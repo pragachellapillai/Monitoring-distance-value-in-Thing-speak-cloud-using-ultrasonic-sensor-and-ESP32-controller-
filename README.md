@@ -96,8 +96,63 @@ Prototype and build IoT systems without setting up servers or developing web sof
 
  
 # PROGRAM:
+```
+#include "ThingSpeak.h"
+#include <WiFi.h>
+char ssid[] = "poco M$ pro"; //SSID
+char pass[] = "solla mata"; // Password
+const int trigger = 25;
+const int echo = 26;
+long T;
+float distanceCM;
+WiFiClient  client;
+
+unsigned long myChannelField = 2711835; // Channel ID
+const int ChannelField = 1; // Which channel to write data
+const char * myWriteAPIKey = "L0Y60IB1NI1JEBU1"; // Your write API Key
+
+void setup()
+{
+  Serial.begin(115200);
+  pinMode(trigger, OUTPUT);
+  pinMode(echo, INPUT);
+  WiFi.mode(WIFI_STA);
+  ThingSpeak.begin(client);
+}
+void loop()
+{
+  if (WiFi.status() != WL_CONNECTED)
+  {
+    Serial.print("Attempting to connect to SSID: ");
+    Serial.println(ssid);
+    while (WiFi.status() != WL_CONNECTED)
+    {
+      WiFi.begin(ssid, pass);
+      Serial.print(".");
+      delay(5000);
+    }
+    Serial.println("\nConnected.");
+  }
+  digitalWrite(trigger, LOW);
+  delay(1);
+  digitalWrite(trigger, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(trigger, LOW);
+  T = pulseIn(echo, HIGH);
+  distanceCM = T * 0.034;
+  distanceCM = distanceCM / 2;
+  Serial.print("Distance in cm: ");
+  Serial.println(distanceCM);
+  ThingSpeak.writeField(myChannelField, ChannelField, distanceCM, myWriteAPIKey);
+  delay(1000);
+}
+```
 # CIRCUIT DIAGRAM:
+![Screenshot 2024-11-22 134728](https://github.com/user-attachments/assets/dbf7a39d-8dde-406a-83ee-4458bc4daf42)
+
 # OUTPUT:
+![Screenshot 2024-11-22 134734](https://github.com/user-attachments/assets/5df6abf4-fe73-438d-96e3-899e438aad71)
+
 # RESULT:
 Thus the distance values are updated in the Thing speak cloud using ESP32 controller.
 
